@@ -72,8 +72,12 @@ func (c *Client) Search(tld, query, language string, count int) ([]SearchResult,
 		}
 		r.Body.Close()
 	}
+	elems := doc.Find(".g .s")
+	if elems.Length() == 0 {
+		return []SearchResult{}, nil
+	}
 	results := make([]SearchResult, 0, count)
-	doc.Find(".g .s").Slice(0, count).Each(func(i int, s *goquery.Selection) {
+	elems.Each(func(i int, s *goquery.Selection) {
 		el := s.Parent()
 		a := el.Find(".r a")
 		h, ok := a.Attr("href")
@@ -81,6 +85,9 @@ func (c *Client) Search(tld, query, language string, count int) ([]SearchResult,
 			return
 		}
 		m := reUrl.FindStringSubmatch(h)
+		if m == nil {
+			return
+		}
 		u, err := url.QueryUnescape(m[1])
 		if err != nil {
 			return
@@ -91,5 +98,8 @@ func (c *Client) Search(tld, query, language string, count int) ([]SearchResult,
 			Content: s.Find(".st").Text(),
 		})
 	})
+	if len(results) > count {
+		results = results[:count]
+	}
 	return results, nil
 }
