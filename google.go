@@ -1,7 +1,6 @@
 package google
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -11,7 +10,7 @@ import (
 )
 
 var (
-	reUrl = regexp.MustCompile("/url\\?q=([^&]+)&")
+	reImage = regexp.MustCompile("imgurl=([^&]+)&")
 )
 
 type Client struct {
@@ -38,8 +37,12 @@ type SearchResult struct {
 	Content string
 }
 
+type ImageResult struct {
+	URL string
+}
+
 func (c *Client) Init(tld string) error {
-	r, err := c.get(fmt.Sprintf("https://www.google.%s", tld))
+	r, err := c.get("https://www.google.%s" + tld)
 	if err != nil {
 		return err
 	}
@@ -49,19 +52,24 @@ func (c *Client) Init(tld string) error {
 
 func (c *Client) get(url string) (*http.Response, error) {
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)")
+	req.Header.Set("User-Agent",
+		"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36")
 	return c.client.Do(req)
 }
 
-func (c *Client) Search(tld, query, language string, count int) ([]SearchResult, error) {
+func (c *Client) Images(tld, query, lang string, safe bool, count int) ([]ImageResult, error) {
 	var doc *goquery.Document
 	{
-		url_str := fmt.Sprintf(
-			"https://www.google.%s/search?hl=%s&q=%s&btnG=Google+Search&safe=off",
-			tld,
-			language,
-			url.QueryEscape(query),
-		)
+		ps := url.Values{
+			"hl":   []string{lang},
+			"q":    []string{query},
+			"btnG": []string{"Google+Search"},
+			"tbm":  []string{"isch"},
+		}
+		if !safe {
+			ps.Set("safe", "off")
+		}
+		url_str := "https://www.google." + tld + "/search?" + ps.Encode()
 		r, err := c.get(url_str)
 		if err != nil {
 			return nil, err
@@ -70,31 +78,70 @@ func (c *Client) Search(tld, query, language string, count int) ([]SearchResult,
 		if err != nil {
 			return nil, err
 		}
-		r.Body.Close()
+		// goquery.NewDocumentFromResponse closes body
+		// r.Body.Close()
 	}
-	elems := doc.Find(".g .s")
+	elems := doc.Find(".ivg-i a")
+	if elems.Length() == 0 {
+		return []ImageResult{}, nil
+	}
+	results := make([]ImageResult, 0, count)
+	elems.Each(func(i int, s *goquery.Selection) {
+		h, ok := s.Attr("href")
+		if !ok {
+			return
+		}
+		m := reImage.FindStringSubmatch(h)
+		if m == nil {
+			return
+		}
+		results = append(results, ImageResult{
+			URL: m[1],
+		})
+	})
+	if len(results) > count {
+		results = results[:count]
+	}
+	return results, nil
+}
+
+func (c *Client) Search(tld, query, lang string, safe bool, count int) ([]SearchResult, error) {
+	var doc *goquery.Document
+	{
+		ps := url.Values{
+			"hl":   []string{lang},
+			"q":    []string{query},
+			"btnG": []string{"Google+Search"},
+		}
+		if !safe {
+			ps.Set("safe", "off")
+		}
+		url_str := "https://www.google." + tld + "/search?" + ps.Encode()
+		r, err := c.get(url_str)
+		if err != nil {
+			return nil, err
+		}
+		doc, err = goquery.NewDocumentFromResponse(r)
+		if err != nil {
+			return nil, err
+		}
+		// goquery.NewDocumentFromResponse closes body
+		// r.Body.Close()
+	}
+	elems := doc.Find(".rc")
 	if elems.Length() == 0 {
 		return []SearchResult{}, nil
 	}
 	results := make([]SearchResult, 0, count)
 	elems.Each(func(i int, s *goquery.Selection) {
-		el := s.Parent()
-		a := el.Find(".r a")
+		a := s.Find(".r a")
 		h, ok := a.Attr("href")
 		if !ok {
 			return
 		}
-		m := reUrl.FindStringSubmatch(h)
-		if m == nil {
-			return
-		}
-		u, err := url.QueryUnescape(m[1])
-		if err != nil {
-			return
-		}
 		results = append(results, SearchResult{
 			Title:   a.Text(),
-			URL:     u,
+			URL:     h,
 			Content: s.Find(".st").Text(),
 		})
 	})
