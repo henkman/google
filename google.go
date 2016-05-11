@@ -42,7 +42,7 @@ type ImageResult struct {
 }
 
 func (c *Client) Init(tld string) error {
-	r, err := c.get("https://www.google.%s" + tld)
+	r, err := c.get("https://www.google." + tld)
 	if err != nil {
 		return err
 	}
