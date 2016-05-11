@@ -66,7 +66,9 @@ func (c *Client) Images(tld, query, lang string, safe bool, count int) ([]ImageR
 			"btnG": []string{"Google+Search"},
 			"tbm":  []string{"isch"},
 		}
-		if !safe {
+		if safe {
+			ps.Set("safe", "on")
+		} else {
 			ps.Set("safe", "off")
 		}
 		url_str := "https://www.google." + tld + "/search?" + ps.Encode()
@@ -113,7 +115,9 @@ func (c *Client) Search(tld, query, lang string, safe bool, count int) ([]Search
 			"q":    []string{query},
 			"btnG": []string{"Google+Search"},
 		}
-		if !safe {
+		if safe {
+			ps.Set("safe", "on")
+		} else {
 			ps.Set("safe", "off")
 		}
 		url_str := "https://www.google." + tld + "/search?" + ps.Encode()
