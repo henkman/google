@@ -41,6 +41,17 @@ type ImageResult struct {
 	URL string
 }
 
+type ImageType string
+
+const (
+	ImageType_Any      ImageType = ""
+	ImageType_Animated           = "animated"
+	ImageType_Face               = "face"
+	ImageType_Clipart            = "clipart"
+	ImageType_Photo              = "photo"
+	ImageType_Lineart            = "lineart"
+)
+
 func (c *Client) Init(tld string) error {
 	r, err := c.get("https://www.google." + tld)
 	if err != nil {
@@ -57,7 +68,7 @@ func (c *Client) get(url string) (*http.Response, error) {
 	return c.client.Do(req)
 }
 
-func (c *Client) Images(tld, query, lang string, safe bool, count int) ([]ImageResult, error) {
+func (c *Client) Images(tld, query, lang string, safe bool, t ImageType, count int) ([]ImageResult, error) {
 	var doc *goquery.Document
 	{
 		ps := url.Values{
@@ -65,6 +76,9 @@ func (c *Client) Images(tld, query, lang string, safe bool, count int) ([]ImageR
 			"q":    []string{query},
 			"btnG": []string{"Google+Search"},
 			"tbm":  []string{"isch"},
+		}
+		if t != ImageType_Any {
+			ps.Set("tbs", "itp:"+string(t))
 		}
 		if safe {
 			ps.Set("safe", "on")
