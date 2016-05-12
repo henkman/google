@@ -17,20 +17,6 @@ type Client struct {
 	client http.Client
 }
 
-func New() (*Client, error) {
-	var client http.Client
-	{
-		jar, err := cookiejar.New(nil)
-		if err != nil {
-			return nil, err
-		}
-		client = http.Client{Jar: jar}
-	}
-	c := new(Client)
-	c.client = client
-	return c, nil
-}
-
 type SearchResult struct {
 	Title   string
 	URL     string
@@ -53,6 +39,11 @@ const (
 )
 
 func (c *Client) Init(tld string) error {
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return err
+	}
+	c.client = http.Client{Jar: jar}
 	r, err := c.get("https://www.google." + tld)
 	if err != nil {
 		return err
