@@ -24,6 +24,8 @@ func (c *Client) Translate(text, sourcelang, targetlang string) (Translation, er
 		"https://translate.googleapis.com/translate_a/single",
 		bytes.NewBufferString(url.Values{
 			"client": []string{"gtx"},
+			"ie":     []string{"UTF-8"},
+			"oe":     []string{"UTF-8"},
 			"sl":     []string{sourcelang},
 			"tl":     []string{targetlang},
 			"dt":     []string{"t"},
