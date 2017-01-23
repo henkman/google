@@ -10,18 +10,18 @@ const (
 )
 
 var (
-	c Client
+	s Session
 )
 
-func TestInit(t *testing.T) {
-	if err := c.Init(); err != nil {
+func TestSearchInit(t *testing.T) {
+	if err := s.Init(); err != nil {
 		t.Log(err)
 		t.Fail()
 	}
 }
 
 func TestSearch(t *testing.T) {
-	rs, err := c.Search(TLD, "kittens", "de", true, 0, 5)
+	rs, err := s.Search(TLD, "kittens", "de", true, 0, 5)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -32,7 +32,7 @@ func TestSearch(t *testing.T) {
 }
 
 func TestImages(t *testing.T) {
-	rs, err := c.Images(TLD, "kittens", "de", true, ImageType_Any, 0, 5)
+	rs, err := s.Images(TLD, "kittens", "de", true, ImageType_Any, 0, 5)
 	if err != nil {
 		t.Log(err)
 		t.Fail()

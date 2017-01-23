@@ -33,7 +33,7 @@ const (
 	ImageType_Lineart            = "lineart"
 )
 
-func (c *Client) Images(tld, query, lang string, safe bool, t ImageType, start, num uint) ([]ImageResult, error) {
+func (s *Session) Images(tld, query, lang string, safe bool, t ImageType, start, num uint) ([]ImageResult, error) {
 	var doc *goquery.Document
 	{
 		ps := url.Values{
@@ -53,7 +53,7 @@ func (c *Client) Images(tld, query, lang string, safe bool, t ImageType, start, 
 			ps.Set("safe", "off")
 		}
 		url_str := "https://www.google." + tld + "/search?" + ps.Encode()
-		r, err := c.request("GET", url_str, nil)
+		r, err := s.request("GET", url_str, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +88,7 @@ func (c *Client) Images(tld, query, lang string, safe bool, t ImageType, start, 
 	return results, nil
 }
 
-func (c *Client) Search(tld, query, lang string, safe bool, start, num uint) ([]SearchResult, error) {
+func (s *Session) Search(tld, query, lang string, safe bool, start, num uint) ([]SearchResult, error) {
 	var doc *goquery.Document
 	{
 		ps := url.Values{
@@ -104,7 +104,7 @@ func (c *Client) Search(tld, query, lang string, safe bool, start, num uint) ([]
 			ps.Set("safe", "off")
 		}
 		url_str := "https://www.google." + tld + "/search?" + ps.Encode()
-		r, err := c.request("GET", url_str, nil)
+		r, err := s.request("GET", url_str, nil)
 		if err != nil {
 			return nil, err
 		}

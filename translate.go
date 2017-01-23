@@ -18,9 +18,9 @@ type Translation struct {
 	Text string
 }
 
-func (c *Client) Translate(text, sourcelang, targetlang string) (Translation, error) {
+func (s *Session) Translate(text, sourcelang, targetlang string) (Translation, error) {
 	var t Translation
-	r, err := c.request("POST",
+	r, err := s.request("POST",
 		"https://translate.googleapis.com/translate_a/single",
 		bytes.NewBufferString(url.Values{
 			"client": []string{"gtx"},

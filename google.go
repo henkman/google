@@ -6,25 +6,29 @@ import (
 	"net/http/cookiejar"
 )
 
-type Client struct {
-	client http.Client
+type Session struct {
+	cli http.Client
 }
 
-func (c *Client) Init() error {
+func (s *Session) Init() error {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return err
 	}
-	c.client.Jar = jar
+	s.cli.Jar = jar
 	return nil
 }
 
-func (c *Client) request(method, url string, body io.Reader) (*http.Response, error) {
+func (s *Session) IsInitialized() bool {
+	return s.cli.Jar != nil
+}
+
+func (s *Session) request(method, url string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("User-Agent",
 		"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36")
-	return c.client.Do(req)
+	return s.cli.Do(req)
 }
