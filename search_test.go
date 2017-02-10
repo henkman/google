@@ -9,18 +9,12 @@ const (
 	TLD = "de"
 )
 
-var (
-	s Session
-)
-
-func TestSearchInit(t *testing.T) {
+func TestSearch(t *testing.T) {
+	var s Session
 	if err := s.Init(); err != nil {
 		t.Log(err)
 		t.Fail()
 	}
-}
-
-func TestSearch(t *testing.T) {
 	rs, err := s.Search(TLD, "kittens", "de", true, 0, 5)
 	if err != nil {
 		t.Log(err)
@@ -32,6 +26,11 @@ func TestSearch(t *testing.T) {
 }
 
 func TestImages(t *testing.T) {
+	var s Session
+	if err := s.Init(); err != nil {
+		t.Log(err)
+		t.Fail()
+	}
 	rs, err := s.Images(TLD, "kittens", "de", true, ImageType_Any, 0, 5)
 	if err != nil {
 		t.Log(err)
