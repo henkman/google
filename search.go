@@ -28,11 +28,11 @@ type ImageType string
 
 const (
 	ImageType_Any      ImageType = ""
-	ImageType_Animated           = "animated"
-	ImageType_Face               = "face"
-	ImageType_Clipart            = "clipart"
-	ImageType_Photo              = "photo"
-	ImageType_Lineart            = "lineart"
+	ImageType_Animated ImageType = "animated"
+	ImageType_Face     ImageType = "face"
+	ImageType_Clipart  ImageType = "clipart"
+	ImageType_Photo    ImageType = "photo"
+	ImageType_Lineart  ImageType = "lineart"
 )
 
 func (s *Session) Images(tld, query, lang string,
